@@ -1,0 +1,19 @@
+stages:
+  - test
+  - deploy
+
+test:
+  stage: test
+  image: python:3.11
+  before_script:
+    - pip install -r requirements.txt
+    - - pip install -r requirements-dev.txt
+  script:
+    - pytest tests/
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy stage - add your deployment commands here"
+  only:
+    - main
