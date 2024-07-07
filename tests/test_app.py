@@ -7,7 +7,7 @@ from utils.utils import load_image, stylize, image_preprocess, resize_image_prop
 
 @pytest.fixture
 def test_image():
-    image_path = "tests/test_image.jpg"
+    image_path = "output_image.png"
     image = Image.new("RGB", (100, 100), color=(73, 109, 137))
     image.save(image_path)
     yield image_path
@@ -24,7 +24,7 @@ def test_load_image(test_image):
 
 
 def test_stylize(test_image):
-    model_path = "models/test_model.model"
+    model_path = "test_model.model"
 
     # Mock model file creation for testing
     torch.save(TransformerNet().state_dict(), model_path)
