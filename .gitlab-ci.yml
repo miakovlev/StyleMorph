@@ -8,7 +8,7 @@ variables:
 
 build:
   stage: build
-  image: docker:latest
+  image: docker:stable
   services:
     - docker:dind
   before_script:
@@ -19,15 +19,11 @@ build:
 
 deploy:
   stage: deploy
-  image: ubuntu:latest
+  image: docker:stable-dind
   services:
     - docker:dind
   before_script:
-    - apt-get update
-    - apt-get install -y curl
-    - curl -fsSL https://get.docker.com -o get-docker.sh
-    - sh get-docker.sh
-    - service docker start
+    - apk add --no-cache curl
     - curl https://cli-assets.heroku.com/install.sh | sh
     - heroku container:login
   script:
