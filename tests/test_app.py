@@ -2,7 +2,7 @@ import pytest
 from PIL import Image
 import torch
 import os
-from utils.utils import load_image, stylize, image_preprocess, resize_image_proportionally, TransformerNet
+from utils import load_image, stylize, image_preprocess, resize_image_proportionally, TransformerNet
 
 
 @pytest.fixture
