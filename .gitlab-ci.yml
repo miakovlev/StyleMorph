@@ -1,9 +1,11 @@
 stages:
   - test
+  - build
   - deploy
 
 variables:
   PYTHONPATH: "$PYTHONPATH:."
+  DOCKER_DRIVER: overlay2
 
 test:
   stage: test
@@ -14,9 +16,24 @@ test:
   script:
     - pytest tests/
 
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u _ -p $HEROKU_API_KEY registry.heroku.com
+  script:
+    - docker build -t registry.heroku.com/stylusfusion/web .
+    - docker push registry.heroku.com/stylusfusion/web
+
 deploy:
   stage: deploy
+  image: python:3.11
+  before_script:
+    - pip install heroku
+    - heroku container:login
   script:
-    - echo "Deploy stage - add your deployment commands here"
+    - heroku container:release web -a stylusfusion
   only:
     - main
