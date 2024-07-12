@@ -18,7 +18,7 @@ test:
 
 build:
   stage: build
-  image: docker:latest
+  image: docker:stable
   services:
     - docker:dind
   before_script:
@@ -29,7 +29,7 @@ build:
 
 deploy:
   stage: deploy
-  image: docker:latest
+  image: docker:stable
   services:
     - docker:dind
   before_script:
