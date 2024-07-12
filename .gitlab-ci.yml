@@ -6,7 +6,6 @@ variables:
   PYTHONPATH: "$PYTHONPATH:."
   DOCKER_DRIVER: overlay2
 
-
 build:
   stage: build
   image: docker:latest
@@ -28,6 +27,7 @@ deploy:
     - apt-get install -y curl
     - curl -fsSL https://get.docker.com -o get-docker.sh
     - sh get-docker.sh
+    - service docker start
     - curl https://cli-assets.heroku.com/install.sh | sh
     - heroku container:login
   script:
