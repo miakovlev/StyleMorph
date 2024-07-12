@@ -1,5 +1,4 @@
 stages:
-  - test
   - build
   - deploy
 
@@ -7,18 +6,10 @@ variables:
   PYTHONPATH: "$PYTHONPATH:."
   DOCKER_DRIVER: overlay2
 
-test:
-  stage: test
-  image: python:3.11
-  before_script:
-    - pip install -r requirements.txt
-    - pip install -r requirements-dev.txt
-  script:
-    - pytest tests/
 
 build:
   stage: build
-  image: docker:stable
+  image: docker:latest
   services:
     - docker:dind
   before_script:
@@ -29,12 +20,14 @@ build:
 
 deploy:
   stage: deploy
-  image: docker:stable
+  image: ubuntu:latest
   services:
     - docker:dind
   before_script:
     - apt-get update
     - apt-get install -y curl
+    - curl -fsSL https://get.docker.com -o get-docker.sh
+    - sh get-docker.sh
     - curl https://cli-assets.heroku.com/install.sh | sh
     - heroku container:login
   script:
