@@ -29,9 +29,11 @@ build:
 
 deploy:
   stage: deploy
-  image: python:3.11
+  image: debian:bullseye
   before_script:
-    - pip install heroku
+    - apt-get update
+    - apt-get install -y curl
+    - curl https://cli-assets.heroku.com/install.sh | sh
     - heroku container:login
   script:
     - heroku container:release web -a stylusfusion
