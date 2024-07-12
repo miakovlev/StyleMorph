@@ -5,7 +5,6 @@ stages:
 variables:
   PYTHONPATH: "$PYTHONPATH:."
   DOCKER_DRIVER: overlay2
-  NVM_DIR: "$HOME/.nvm"
 
 build:
   stage: build
@@ -25,7 +24,8 @@ deploy:
     - docker:dind
   before_script:
     - apk add --no-cache bash curl
-    - apk add --no-cache nodejs npm
+    - mkdir -p $HOME/.nvm
+    - export NVM_DIR="$HOME/.nvm"
     - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
     - source "$NVM_DIR/nvm.sh"
     - nvm install 14
