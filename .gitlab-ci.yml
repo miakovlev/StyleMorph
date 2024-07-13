@@ -1,38 +1,12 @@
 stages:
-  - build
-  - deploy
+  - test
 
-variables:
-  PYTHONPATH: "$PYTHONPATH:."
-  DOCKER_DRIVER: overlay2
-  NVM_DIR: "/root/.nvm"
-
-build:
-  stage: build
-  image: docker:stable
-  services:
-    - docker:dind
+test:
+  stage: test
+  image: python:3.11
   before_script:
-    - docker login -u _ -p $HEROKU_API_KEY registry.heroku.com
+    - pip install --upgrade pip --root-user-action=ignore
+    - pip install -r requirements.txt
+    - pip install -r requirements-dev.txt
   script:
-    - docker build -t registry.heroku.com/stylusfusion/web .
-    - docker push registry.heroku.com/stylusfusion/web
-
-deploy:
-  stage: deploy
-  image: docker:stable-dind
-  services:
-    - docker:dind
-  before_script:
-    - apk add --no-cache bash curl
-    - mkdir -p $NVM_DIR
-    - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-    - source $NVM_DIR/nvm.sh
-    - nvm install 14
-    - nvm use 14
-    - curl https://cli-assets.heroku.com/install.sh | bash
-    - heroku container:login
-  script:
-    - heroku container:release web -a stylusfusion
-  only:
-    - main
+    - pytest tests/

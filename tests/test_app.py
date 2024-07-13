@@ -1,8 +1,8 @@
 import pytest
+import numpy as np
 from PIL import Image
-import torch
 import os
-from utils.utils import load_image, stylize, image_preprocess, resize_image_proportionally, TransformerNet
+from utils.utils import load_image, stylize, image_preprocess, resize_image_proportionally
 
 
 @pytest.fixture
@@ -24,21 +24,23 @@ def test_load_image(test_image):
 
 
 def test_stylize(test_image):
-    model_path = "test_model.model"
+    model_path = "test_model.onnx"
 
-    # Mock model file creation for testing
-    torch.save(TransformerNet().state_dict(), model_path)
+    # Mock ONNX model file creation for testing
+    dummy_input = np.random.randn(1, 3, 100, 100).astype(np.float32)
+    dummy_output = np.random.randn(1, 3, 100, 100).astype(np.float32)
+    np.savez(model_path, input=dummy_input, output=dummy_output)
 
     output = stylize(test_image, model_path)
-    assert isinstance(output, torch.Tensor)
-    assert output.shape == (3, 100, 100)
+    assert isinstance(output, np.ndarray)
+    assert output.shape == (1, 3, 100, 100)
 
-    if os.path.exists(model_path):
-        os.remove(model_path)
+    if os.path.exists(model_path + ".npz"):
+        os.remove(model_path + ".npz")
 
 
 def test_image_preprocess():
-    tensor = torch.rand(3, 100, 100)
+    tensor = np.random.rand(1, 3, 100, 100).astype(np.float32)
     image = image_preprocess(tensor)
     assert isinstance(image, Image.Image)
     assert image.size == (100, 100)
