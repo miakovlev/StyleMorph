@@ -6,20 +6,19 @@ from utils.utils import stylize, image_preprocess, resize_image_proportionally
 if "file_name" not in st.session_state:
     st.session_state["file_name"] = "output_image"
 
-
 content_image = st.file_uploader("Upload your image", type=["jpg", "jpeg", "png"])
 style_options = ["The Scream", "The Starry Night", "The Dance", "The Papal Palace", "Louis Valtat",
                  "Diana Malivani", "Kangchenjunga"]
 style_choice = st.selectbox("Choose a style", style_options)
 
 model_paths = {
-    "The Scream": "models/epoch_500_1_100000.0_style1.model",
-    "The Starry Night": "models/epoch_500_1_100000.0_style2.model",
-    "The Dance": "models/epoch_200_1_100000.0_style3.model",
-    "The Papal Palace": "models/epoch_200_1_100000.0_style4.model",
-    "Louis Valtat": "models/epoch_200_1_100000.0_style5.model",
-    "Diana Malivani": "models/epoch_200_1_100000.0_style6.model",
-    "Kangchenjunga": "models/epoch_200_1_100000.0_style7.model"
+    "The Scream": "models/epoch_500_1_100000.0_style1.onnx",
+    "The Starry Night": "models/epoch_500_1_100000.0_style2.onnx",
+    "The Dance": "models/epoch_200_1_100000.0_style3.onnx",
+    "The Papal Palace": "models/epoch_200_1_100000.0_style4.onnx",
+    "Louis Valtat": "models/epoch_200_1_100000.0_style5.onnx",
+    "Diana Malivani": "models/epoch_200_1_100000.0_style6.onnx",
+    "Kangchenjunga": "models/epoch_200_1_100000.0_style7.onnx"
 }
 
 style_photo_paths = {
@@ -57,4 +56,5 @@ if content_image and style_choice:
             output_image.save(output_image_path)
 
             with open(output_image_path, "rb") as file:
-                st.download_button("Download styled image", file, file_name=f"{st.session_state['file_name']}.png", mime="image/png")
+                st.download_button("Download styled image", file, file_name=f"{st.session_state['file_name']}.png",
+                                   mime="image/png")
