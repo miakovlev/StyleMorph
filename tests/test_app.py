@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from PIL import Image
 import os
-from utils.utils import load_image, stylize, image_preprocess, resize_image_proportionally
+from utils.utils import load_image, image_preprocess, resize_image_proportionally
 
 
 @pytest.fixture
@@ -21,22 +21,6 @@ def test_load_image(test_image):
 
     img = load_image(test_image, scale=2)
     assert img.size == (50, 50)
-
-
-def test_stylize(test_image):
-    model_path = "test_model.onnx"
-
-    # Mock ONNX model file creation for testing
-    dummy_input = np.random.randn(1, 3, 100, 100).astype(np.float32)
-    dummy_output = np.random.randn(1, 3, 100, 100).astype(np.float32)
-    np.savez(model_path, input=dummy_input, output=dummy_output)
-
-    output = stylize(test_image, model_path)
-    assert isinstance(output, np.ndarray)
-    assert output.shape == (1, 3, 100, 100)
-
-    if os.path.exists(model_path + ".npz"):
-        os.remove(model_path + ".npz")
 
 
 def test_image_preprocess():

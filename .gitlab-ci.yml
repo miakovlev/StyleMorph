@@ -1,6 +1,9 @@
 stages:
   - test
 
+variables:
+  PYTHONPATH: "$PYTHONPATH:."
+
 test:
   stage: test
   image: python:3.11
