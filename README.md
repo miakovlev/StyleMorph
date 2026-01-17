@@ -14,19 +14,10 @@ The codebase includes a simple inference pipeline, a Streamlit front end, and Do
 ## Before / After Gallery (placeholders)
 > **Insert images here**: Please replace the placeholders below with real screenshots.
 
-### Example 1
-**Before**
-![Before placeholder - replace with screenshot](docs/images/before-1.png)
+### Example 
+![Example](images/downloads/inference1.png)
 
-**After**
-![After placeholder - replace with screenshot](docs/images/after-1.png)
 
-### Example 2
-**Before**
-![Before placeholder - replace with screenshot](docs/images/before-2.png)
-
-**After**
-![After placeholder - replace with screenshot](docs/images/after-2.png)
 
 ## Building and Running the Docker Container
 
