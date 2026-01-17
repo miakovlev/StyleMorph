@@ -11,10 +11,8 @@ The codebase includes a simple inference pipeline, a Streamlit front end, and Do
 - Pretrained style transfer models for fast inference.
 - Dockerized setup for consistent local runs.
 
-## Before / After Gallery (placeholders)
-> **Insert images here**: Please replace the placeholders below with real screenshots.
-
-### Example 
+## Before / After Gallery 
+### Example
 ![Example](images/downloads/inference1.png)
 
 
