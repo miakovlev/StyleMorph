@@ -1,6 +1,8 @@
+import io
+
 import streamlit as st
 from PIL import Image
-from utils.utils import stylize, image_preprocess, resize_image_proportionally
+from utils.utils import load_image, stylize, image_preprocess, resize_image_proportionally
 
 # Initialize session state for file_name
 if "file_name" not in st.session_state:
@@ -43,18 +45,18 @@ if content_image and style_choice:
 
     if st.button("Apply Style"):
         with st.spinner('Applying style...'):
-            output_image = stylize(content_image, model_path)
+            original_image = load_image(content_image)
+            output_image = stylize(original_image, model_path)
             output_image = image_preprocess(output_image)
 
             col1, col2 = st.columns(2)
-            col1.image(content_image, caption="Original image")
+            col1.image(original_image, caption="Original image")
             col2.image(output_image, caption="Styled image")
 
             st.image(style_image, caption="Style image", use_column_width=True)
 
-            output_image_path = f"images/downloads/{st.session_state['file_name']}.png"
-            output_image.save(output_image_path)
-
-            with open(output_image_path, "rb") as file:
-                st.download_button("Download styled image", file, file_name=f"{st.session_state['file_name']}.png",
-                                   mime="image/png")
+            # Serve the result from memory: nothing is written to the server's disk
+            buffer = io.BytesIO()
+            output_image.save(buffer, format="PNG")
+            st.download_button("Download styled image", buffer.getvalue(),
+                               file_name=f"{st.session_state['file_name']}.png", mime="image/png")

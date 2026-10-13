@@ -1,10 +1,12 @@
 import onnxruntime as ort
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 
-def load_image(filename, max_size=512, size=None, scale=None):
-    img = Image.open(filename).convert('RGB')
+def load_image(source, max_size=512, size=None, scale=None):
+    img = source if isinstance(source, Image.Image) else Image.open(source)
+    # Phone photos keep their rotation in EXIF; apply it so the image is upright
+    img = ImageOps.exif_transpose(img).convert('RGB')
 
     if max(img.size) > max_size:
         scaling_factor = max_size / float(max(img.size))
@@ -26,8 +28,13 @@ def stylize(content_image, model_path):
     content_image = np.array(content_image).transpose(2, 0, 1).astype(np.float32)
     content_image = np.expand_dims(content_image, axis=0)
 
+    # The network downsamples by 4, so pad to a multiple of 4 and crop back to keep the input size
+    height, width = content_image.shape[2:]
+    padding = ((0, 0), (0, 0), (0, -height % 4), (0, -width % 4))
+    content_image = np.pad(content_image, padding, mode="reflect")
+
     outputs = session.run(None, {"input": content_image})
-    output = outputs[0]
+    output = outputs[0][:, :, :height, :width]
     return output
 
 

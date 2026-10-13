@@ -1,0 +1,18 @@
+# Only the app, its utils, ONNX models and style images go into the image
+.git
+.github
+.gitlab-ci.yml
+.dockerignore
+Dockerfile
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.ipynb_checkpoints/
+*.ipynb
+tests/
+requirements-dev.txt
+models/*.model
+images/downloads/
+PLAN.md
+README.md
