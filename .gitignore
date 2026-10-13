@@ -2,5 +2,11 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+venv/
+.idea/
 .ipynb_checkpoints/
 .DS_Store
+
+# Training data and run outputs stay out of git
+data/
+runs/

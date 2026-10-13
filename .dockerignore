@@ -8,10 +8,16 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+venv/
+.idea/
 .ipynb_checkpoints/
 *.ipynb
 tests/
 requirements-dev.txt
+requirements-train.txt
+training/
+data/
+runs/
 models/*.model
 images/downloads/
 PLAN.md
