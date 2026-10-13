@@ -31,6 +31,28 @@ The app is then available at http://localhost:8501.
 pip install -r requirements-dev.txt
 python -m pytest tests/
 ```
+Tests of the training code run only when the packages from `requirements-train.txt` are installed, otherwise they are skipped.
+
+## Training
+Training runs from `training/` on [COCO val2017](https://cocodataset.org/) images; the dataset is not in git.
+The train/val/test split lists are in `training/splits/coco_val2017/`.
+```bash
+pip install -r requirements-train.txt
+mkdir -p data/coco && curl -L -o data/coco/val2017.zip http://images.cocodataset.org/zips/val2017.zip
+unzip -q data/coco/val2017.zip -d data/coco
+
+# Train one style: losses.csv, losses.png, best.model (lowest val loss) and samples/ go to the run directory
+python -m training.train --style images/style_images/style2.jpg --out runs/starry
+
+# Export to ONNX and check it against PyTorch
+python -m training.export_onnx runs/starry/best.model runs/starry/best.onnx
+
+# Compare models side by side on the 12 test images
+python -m training.compare_grid --out runs/starry_compare.jpg \
+    old=models/epoch_500_1_100000.0_style2.onnx new=runs/starry/best.onnx
+```
+`python -m training.train --help` lists the options: style image size, style weight, number of images, batch size and others.
+The training device is picked automatically (CUDA, Apple MPS or CPU).
 
 ## How it works
 The image transformation network and the perceptual losses (VGG16 content loss and Gram-matrix style loss) follow
