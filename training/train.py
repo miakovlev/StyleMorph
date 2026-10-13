@@ -80,9 +80,11 @@ def normalize_batch(batch):
 
 
 def gram_matrix(features):
-    b, ch, h, w = features.size()
-    features = features.view(b, ch, h * w)
-    return features.bmm(features.transpose(1, 2)) / (ch * h * w)
+    # The sum over all pixels overflows float16, so with --amp the Gram matrix stays in float32
+    with torch.autocast(features.device.type, enabled=False):
+        b, ch, h, w = features.size()
+        features = features.float().view(b, ch, h * w)
+        return features.bmm(features.transpose(1, 2)) / (ch * h * w)
 
 
 class PerceptualLoss(nn.Module):
@@ -192,12 +194,14 @@ def train(args):
     if args.init:
         transformer.load_state_dict(torch.load(args.init, map_location="cpu"))
     optimizer = torch.optim.Adam(transformer.parameters(), lr=args.lr)
+    use_amp = args.amp and device.type == "cuda"
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     style_image = load_style_image(args.style, args.style_size).to(device)
     loss_fn = PerceptualLoss(Vgg16(args.pretrained_vgg).to(device), style_image,
                              args.content_weight, args.style_weight)
 
     total_steps = args.images // args.batch_size
-    print(f"device {device}, train {len(train_set)}, val {len(val_set)} images, "
+    print(f"device {device}{' float16' if use_amp else ''}, train {len(train_set)}, val {len(val_set)} images, "
           f"{total_steps} steps of {args.batch_size}, style image {tuple(style_image.shape[2:])}", flush=True)
 
     columns = ["step", "images", "seconds", "images_per_sec", "train_content", "train_style", "train_total",
@@ -214,9 +218,12 @@ def train(args):
             for x in train_loader:
                 x = x.to(device, non_blocking=True)
                 optimizer.zero_grad(set_to_none=True)
-                content_loss, style_loss = loss_fn(x, transformer(x))
-                (content_loss + style_loss).backward()
-                optimizer.step()
+                # Validation stays in float32 so that val losses compare across runs with and without --amp
+                with torch.autocast(device.type, dtype=torch.float16, enabled=use_amp):
+                    content_loss, style_loss = loss_fn(x, transformer(x))
+                scaler.scale(content_loss + style_loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
 
                 # Accumulate on the device: calling .item() every step would stall the GPU
                 interval_losses += torch.stack([content_loss.detach(), style_loss.detach()])
@@ -286,6 +293,7 @@ def parse_args(argv=None):
     parser.add_argument("--samples", type=int, default=6, help="test images shown in samples/")
     parser.add_argument("--sample-size", type=int, default=384)
     parser.add_argument("--device", default="auto", help="auto, cuda, mps or cpu")
+    parser.add_argument("--amp", action="store_true", help="train in mixed precision (float16), CUDA only")
     parser.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 1))
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--no-pretrained-vgg", dest="pretrained_vgg", action="store_false",
