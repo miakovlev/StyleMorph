@@ -5,13 +5,28 @@ Each of the seven styles is a separate feed-forward network exported to ONNX, so
 Photos are downscaled to 512 px on the long side before stylization.
 
 ## Example
-![Example](images/downloads/inference1.png)
+![Example](images/downloads/example.jpg)
 
 ## Styles
 The Scream, The Starry Night, The Dance, The Papal Palace, Louis Valtat, Diana Malivani, Kangchenjunga.
 
-- `images/style_images/` — style images.
-- `models/*.onnx` — models used by the app; `models/*.model` — the matching PyTorch checkpoints.
+The app has two versions of the models, picked with the "Model version" switch:
+- **Retrained (2026)**, the default — `models/v2/style1.onnx` … `style7.onnx`. Trained with the code in `training/` on 4498 COCO images
+  (people, cities, interiors, animals), 40,000 images per style, batch 4, style image at 512 px, best checkpoint by validation loss.
+  They keep faces and skin tones better than the original models.
+- **Original (2024)** — `models/epoch_*.onnx`, trained in `StylusFusion.ipynb` on 360 landscape photos for 200 or 500 epochs.
+
+`.model` files next to the ONNX models are the matching PyTorch checkpoints. `images/style_images/` holds the style images.
+
+| Style | Image | Style weight (retrained) |
+|---|---|---|
+| The Scream | `style1.jpg` | 5e4 |
+| The Starry Night | `style2.jpg` | 5e4 |
+| The Dance | `style3.jpg` | 1e5 |
+| The Papal Palace | `style4.jpg` | 5e4 |
+| Louis Valtat | `style5.jpg` | 3e4 |
+| Diana Malivani | `style6.jpg` | 5e4 |
+| Kangchenjunga | `style7.jpg` | 5e4 |
 
 ## Running locally
 ```bash
@@ -52,11 +67,12 @@ python -m training.compare_grid --out runs/starry_compare.jpg \
     old=models/epoch_500_1_100000.0_style2.onnx new=runs/starry/best.onnx
 ```
 `python -m training.train --help` lists the options: style image size, style weight, number of images, batch size and others.
-The training device is picked automatically (CUDA, Apple MPS or CPU).
+The training device is picked automatically (CUDA, Apple MPS or CPU); `--amp` trains in mixed precision on CUDA
+(1.3× faster on an RTX 2080 Ti with the same results). The retrained models took about 13 minutes per style on that GPU.
 
 ## How it works
 The image transformation network and the perceptual losses (VGG16 content loss and Gram-matrix style loss) follow
 Johnson et al., [Perceptual Losses for Real-Time Style Transfer and Super-Resolution](https://arxiv.org/abs/1603.08155) (ECCV 2016).
 The network and training code are adapted from the PyTorch
 [fast_neural_style example](https://github.com/pytorch/examples/tree/main/fast_neural_style) (BSD-3-Clause).
-Training is described in `StylusFusion.ipynb`.
+The original models were trained in `StylusFusion.ipynb`; the retrained ones with the scripts in `training/`.

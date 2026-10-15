@@ -14,7 +14,7 @@ from training.train import parse_args, train  # noqa: E402
 from utils.utils import image_preprocess, stylize  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINTS = sorted((ROOT / "models").glob("*.model"))
+CHECKPOINTS = sorted((ROOT / "models").glob("*.model")) + sorted((ROOT / "models" / "v2").glob("*.model"))
 STARRY_NIGHT = ROOT / "models" / "epoch_500_1_100000.0_style2"
 
 
@@ -38,8 +38,9 @@ def splits(image_folder, tmp_path):
     return splits_dir
 
 
-def test_old_checkpoints_load():
-    assert len(CHECKPOINTS) == 7
+def test_checkpoints_load():
+    # Original models in models/, retrained ones in models/v2/
+    assert len(CHECKPOINTS) == 14
     for checkpoint in CHECKPOINTS:
         load_transformer(checkpoint)
 
@@ -83,11 +84,12 @@ def test_export_matches_pytorch(tmp_path):
     assert stylize(Image.new("RGB", (67, 45)), path).shape == (1, 3, 45, 67)
 
 
-def test_checkpoint_matches_app_model():
+@pytest.mark.parametrize("checkpoint", CHECKPOINTS, ids=lambda path: str(path.relative_to(ROOT / "models")))
+def test_checkpoint_matches_app_model(checkpoint):
     # The committed .model checkpoints are the sources of the ONNX models the app runs
     image = Image.fromarray(np.random.default_rng(1).integers(0, 256, (45, 67, 3), dtype=np.uint8))
-    from_checkpoint = stylize_checkpoint(image, load_transformer(f"{STARRY_NIGHT}.model"))
-    from_onnx = image_preprocess(stylize(image, f"{STARRY_NIGHT}.onnx"))
+    from_checkpoint = stylize_checkpoint(image, load_transformer(checkpoint))
+    from_onnx = image_preprocess(stylize(image, str(checkpoint.with_suffix(".onnx"))))
 
     difference = np.abs(np.asarray(from_checkpoint, dtype=int) - np.asarray(from_onnx, dtype=int))
     assert difference.max() <= 1

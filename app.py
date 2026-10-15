@@ -13,15 +13,28 @@ style_options = ["The Scream", "The Starry Night", "The Dance", "The Papal Palac
                  "Diana Malivani", "Kangchenjunga"]
 style_choice = st.selectbox("Choose a style", style_options)
 
-model_paths = {
-    "The Scream": "models/epoch_500_1_100000.0_style1.onnx",
-    "The Starry Night": "models/epoch_500_1_100000.0_style2.onnx",
-    "The Dance": "models/epoch_200_1_100000.0_style3.onnx",
-    "The Papal Palace": "models/epoch_200_1_100000.0_style4.onnx",
-    "Louis Valtat": "models/epoch_200_1_100000.0_style5.onnx",
-    "Diana Malivani": "models/epoch_200_1_100000.0_style6.onnx",
-    "Kangchenjunga": "models/epoch_200_1_100000.0_style7.onnx"
+# Retrained models (COCO, 2026) are the default; the original models (landscapes, 2024) stay available
+model_versions = {
+    "Retrained (2026)": {
+        "The Scream": "models/v2/style1.onnx",
+        "The Starry Night": "models/v2/style2.onnx",
+        "The Dance": "models/v2/style3.onnx",
+        "The Papal Palace": "models/v2/style4.onnx",
+        "Louis Valtat": "models/v2/style5.onnx",
+        "Diana Malivani": "models/v2/style6.onnx",
+        "Kangchenjunga": "models/v2/style7.onnx"
+    },
+    "Original (2024)": {
+        "The Scream": "models/epoch_500_1_100000.0_style1.onnx",
+        "The Starry Night": "models/epoch_500_1_100000.0_style2.onnx",
+        "The Dance": "models/epoch_200_1_100000.0_style3.onnx",
+        "The Papal Palace": "models/epoch_200_1_100000.0_style4.onnx",
+        "Louis Valtat": "models/epoch_200_1_100000.0_style5.onnx",
+        "Diana Malivani": "models/epoch_200_1_100000.0_style6.onnx",
+        "Kangchenjunga": "models/epoch_200_1_100000.0_style7.onnx"
+    }
 }
+version_choice = st.radio("Model version", list(model_versions), horizontal=True)
 
 style_photo_paths = {
     "The Scream": "images/style_images/style1.jpg",
@@ -34,7 +47,7 @@ style_photo_paths = {
 }
 
 if content_image and style_choice:
-    model_path = model_paths[style_choice]
+    model_path = model_versions[version_choice][style_choice]
     style_photo_path = style_photo_paths[style_choice]
 
     style_image = Image.open(style_photo_path)
